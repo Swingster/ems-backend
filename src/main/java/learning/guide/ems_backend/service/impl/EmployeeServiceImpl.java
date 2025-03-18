@@ -42,4 +42,46 @@ public class EmployeeServiceImpl implements EmployeeService {
                 map((employee -> EmployeeMapper.mapToEmployeeDto(employee))).
                 collect(Collectors.toList());
     }
+
+    @Override
+    public EmployeeDto updateEmployee(Long employeeId, EmployeeDto updatedEmployee) {
+        Employee employee = employeeRepository.findById(employeeId).
+                orElseThrow(() -> new ResourceNotFoundException("Employee does not exist : " + employeeId));
+        employee.setFirstName(updatedEmployee.getFirstName());
+        employee.setLastName(updatedEmployee.getLastName());
+        employee.setEmail(updatedEmployee.getEmail());
+
+        Employee updatedEmployeeObj = employeeRepository.save(employee);
+        return EmployeeMapper.mapToEmployeeDto(updatedEmployeeObj);
+    }
+
+    @Override
+    public void deleteEmployee(Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId).
+                orElseThrow(() -> new ResourceNotFoundException("Employee does not exist : " + employeeId));
+        employeeRepository.deleteById(employeeId);
+
+    }
+
+    @Override
+    public List<EmployeeDto> getEmployeesByFirstName(String firstName) {
+        List<Employee> employees = employeeRepository.findByFirstName(firstName);
+        if (employees.isEmpty()) {
+            throw new ResourceNotFoundException("Employee does not exist : " + firstName);
+        }
+        return employees.stream()
+                .map(EmployeeMapper::mapToEmployeeDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EmployeeDto> getEmployeesByLastName(String lastName) {
+        List<Employee> employees = employeeRepository.findByLastName(lastName);
+        if (employees.isEmpty()) {
+            throw new ResourceNotFoundException("Employee does not exist : " + lastName);
+        }
+        return employees.stream()
+                .map(EmployeeMapper::mapToEmployeeDto)
+                .collect(Collectors.toList());
+    }
 }
